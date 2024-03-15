@@ -1,0 +1,145 @@
+﻿@using VisitasApp.Data;
+@using Microsoft.AspNetCore.Identity
+@model Paginacion<Visita>
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<!--Si el usuario inicio sesion-->
+@if (SignInManager.IsSignedIn(User))
+{
+    <h1>Visitas</h1>
+    <hr />
+
+    <p>
+        <a asp-action="Create" class="btn btn-dark rounded-pill" ><i class="fa-solid fa-plus"></i>Registrar Visita</a> 
+    </p>
+
+    <form asp-controller="Visita" asp-action="Index" autocomplete=“off”>
+        <input autocomplete="false" name="hidden" type="hidden">
+        @{
+            var anteriordeshabilitado= !Model.PaginasAnteriores ? "disabled":"";
+            var siguientedeshabilitado= !Model.PaginasPosteriores ? "disabled":"";
+        }
+        
+        <div class="row" style="width: 100%;">
+            <div class="col-lg-6"> 
+                <div class="form-group">                    
+                    <input type="text" name="buscar" style="width: 60%; height:35px;" autocomplete=“off” value ="@ViewData["FiltroActual"]" class="form-text" placeholder=" -- Buscar -- " />
+                    <input type="submit" value="Buscar" class="btn btn-sm btn-dark" />
+                    <a asp-action="Index" >Lista completa</a>                    
+                </div>
+            </div>
+            <div class="col-lg-6"> 
+                <div class="float: right;">
+                    <a asp-action="Index" 
+                        asp-route-numpag="@(Model.PaginaInicio - 1)" asp-route-filtroActual="@ViewData["FiltroActual"]"
+                        class="btn btn-dark @anteriordeshabilitado">Anterior
+                    </a>
+            
+                    @for (var i = 1; i<= Model.PaginasTotales; i++)
+                    { 
+                        var paginaactiva=(i==Model.PaginaInicio) ? "active" : "" ; 
+            
+                        <a  asp-action="Index" asp-route-numpag="@i"
+                            asp-route-filtroActual="@ViewData["FiltroActual"]" class="btn @paginaactiva" style="color: #ffffff;background-color: #17487A;" >
+                            @i
+                        </a> 
+                    }
+
+                    <a asp-action="Index" asp-route-numpag="@(Model.PaginaInicio + 1)" asp-route-filtroActual="@ViewData["FiltroActual"]"
+                        class="btn btn-dark @siguientedeshabilitado">Siguiente
+                    </a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <table class="table" id="customers">
+        <thead>
+            <tr>
+                <th>
+                    Tipo Doc.
+                </th>
+                <th>
+                    Documento
+                </th>
+                <th>
+                    Nombres
+                </th>
+                <th>
+                    Apellidos
+                </th>
+                <th>
+                    Departamento
+                </th>
+                <th>
+                    Comentario
+                </th>                  
+                <th class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model) {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TipoDocumento.ValorS)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Documento)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Nombres)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Apellidos)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Departamento.Nombre)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Comentario)
+                </td>
+                <td>
+                    <form asp-action="Delete" asp-route-id="@item.Id">
+                        <div class="btn-group btn-group-sm">                            
+                            @{            
+                                var editarDis=(@item.Salida != null) ? "disabled":"";
+                            }
+                            
+                            <a asp-action="Edit" class="btn btn-dark @editarDis" asp-route-id="@item.Id"> 
+                                <i class="fa-solid fa-pen-to-square"></i>Editar
+                            </a>
+                            
+                            <a asp-action="Details" class="btn" style="color: #ffffff;background-color: #17487A;" asp-route-id="@item.Id"> 
+                                <i class="fa-solid fa-list"></i>Detalle 
+                            </a>
+                            <!--
+                            <button type="submit" class="btn btn-danger"
+                                onclick="return confirm('Esta seguro de Eliminar el registro?')"> 
+                                <i class="far fa-trash-alt"></i>Borrar
+                                </button> -->
+                        </div>
+                    </form>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+}
+else 
+{   
+    <div class="text-center">         
+         <img  src="~/images/LogoWebPolitur.png" width="230" height="320" />
+         <h1 class="display-4">Dirección Central de Policía de Turismo - POLITUR</h1>
+         <h4 class="display-6 text-primary">Portal para Administrar Visitas</h4>
+         <hr />
+         <h2> <br><br><br>            
+            <a id="login" asp-area="Identity" asp-page="/Account/Login"><u>[Iniciar Sesión]</u></a>    
+        </h2>
+    </div>    
+}
+                              
